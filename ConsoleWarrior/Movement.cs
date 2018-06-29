@@ -44,8 +44,9 @@ namespace ConsoleWarrior
 
         public void Execute()
         {
-            continuationAction?.Invoke();
             executed = true;
+            continuationAction?.Invoke();
+            continuation?.Execute();
         }
     }
 
@@ -99,6 +100,7 @@ namespace ConsoleWarrior
             {
                 involvedCell.Remove(entity);
             }
+            
         }
 
         public void Dispose()

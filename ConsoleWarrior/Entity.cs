@@ -6,21 +6,23 @@ namespace ConsoleWarrior
     {
         private Movement previousMovement = null;
         private World world;
-        private Shape shape = Shape.Dot;
+        protected Shape shape = Shape.Dot;
 
         public int X { get; private set; }
         public int Y { get; private set; }
 
-        internal void Attach(World world, int x, int y)
+        internal Movement Attach(World world, int x, int y)
         {
             this.world = world;
-            this.Move(x, y);
+            return Move(x, y);
         }
 
         protected Movement Move(int x, int y)
         {
             Movement movement = shape.Move(world, this, x, y);
-            movement.ContinueWith(() => previousMovement?.Rollback());
+            movement
+                .ContinueWith(() => previousMovement?.Rollback())
+                .ContinueWith(()=> { X = x; Y = y; });
             return movement;
         }
 
@@ -33,7 +35,7 @@ namespace ConsoleWarrior
         {        
         }
 
-        protected internal virtual void ExitCollision(Entity otherEntity)
+        protected internal virtual void ExitCollision(Entity other)
         {
             
         }

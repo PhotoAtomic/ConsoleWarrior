@@ -12,6 +12,11 @@ namespace ConsoleWarrior
 
         public World(int width, int height)
         {
+            this.Width = width;
+            this.Height = height;
+
+            cells = new HashSet<Entity>[Width, Height];
+
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
@@ -24,18 +29,9 @@ namespace ConsoleWarrior
 
         public HashSet<Entity> GetCell(int x, int y)
         {
-            if (x < 0 || x > Width && y < 0 || x > Height) return null;
+            if (x < 0 || x > Width || y < 0 || x > Height) return null;
             return cells[x, y];
         }
-
-        internal void Render()
-        {
-            
-        }
-
-        internal void Update()
-        {
-            
-        }
+      
     }
 }

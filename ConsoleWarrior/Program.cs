@@ -9,14 +9,16 @@ namespace ConsoleWarrior
         {
             World level = LevelLoader.Load();
             var hero = new Hero();
+            var camera = new Camera();
             IController player1 = new ConsoleController(hero);
-            hero.Attach(level, level.Width /2 , level.Height / 2);
+            camera.Attach(level, level.Width / 2, level.Height / 2).Commit();
+            hero.Attach(level, level.Width /2 , level.Height / 2).Commit();
 
             do
             {
                 player1.ProcessInput();
-                level.Update();
-                level.Render();
+                
+                camera.Render();
             } while (!player1.Exit);
         }
     }
