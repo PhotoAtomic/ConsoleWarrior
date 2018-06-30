@@ -1,12 +1,16 @@
-﻿using System;
+﻿using ConsoleWarrior.Objects;
+using System;
 
 namespace ConsoleWarrior
 {
     internal class LevelLoader
     {
-        internal static World Load()
+        internal static World Load(IDriver driver)
         {
-            return new World(100,100);
+            var world =  new World(100,100);
+            var torch = new Torch(driver);
+            torch.Attach(world, 50, 51);
+            return world;
         }
     }
 }

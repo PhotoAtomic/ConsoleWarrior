@@ -1,5 +1,7 @@
 ﻿using ConsoleWarrior.Sprites.Text;
+using ConsoleWarrior.Sprites.Text.Flame;
 using System;
+using ConsoleWarrior.Animations;
 
 namespace ConsoleWarrior.Drivers
 {
@@ -30,7 +32,7 @@ namespace ConsoleWarrior.Drivers
         readonly int Heigth = 50;//Console.LargestWindowHeight;
 
 
-        static readonly ISprite Unknown = new Unknown();
+        static readonly ISprite Unknown = new Generic("?");
 
         private Cleaner CleanerRenderer;
 
@@ -44,6 +46,13 @@ namespace ConsoleWarrior.Drivers
 
         public ISprite GetSprite(string name)
         {
+            switch (name)
+            {
+                case "Flame1": return new Flame1();
+                case "Flame2": return new Flame2();
+                case "Flame3": return new Flame3();
+                case "Flame4": return new Flame4();
+            }
             return Unknown;
         }
 
@@ -71,6 +80,15 @@ namespace ConsoleWarrior.Drivers
             {
                 s.Draw(CleanerRenderer, (int)request.X, (int)request.Y);
             }
+        }
+
+        public Fire GetAnimation(string name)
+        {
+            switch (name)
+            {
+                case "fire":return new Fire(this);
+            }
+            throw new ArgumentOutOfRangeException();
         }
     }
 }

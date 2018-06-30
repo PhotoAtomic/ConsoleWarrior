@@ -6,6 +6,6 @@ namespace ConsoleWarrior
     {
         int Depth { get; }
 
-        IEnumerable<DrawRequest> Render();
+        IEnumerable<DrawRequest> Render(double elapsed);
     }
 }

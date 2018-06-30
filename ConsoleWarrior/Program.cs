@@ -11,7 +11,7 @@ namespace ConsoleWarrior
 
             IDriver driver = new ConsoleGraphic();
 
-            World level = LevelLoader.Load();
+            World level = LevelLoader.Load(driver);
             var hero = new Hero(driver);
             var camera = new Camera(driver);
             IController player1 = new ConsoleController(hero);
@@ -19,11 +19,15 @@ namespace ConsoleWarrior
             camera.Attach(level, level.Width / 2, level.Height / 2).Commit();
             hero.Attach(level, level.Width /2 , level.Height / 2).Commit();
 
+            var lastTime = DateTime.Now;
             do
             {
+                var current = DateTime.Now;
                 player1.ProcessInput();
-                
-                camera.Render();
+
+                var elapsed = current.Subtract(lastTime);
+                camera.Render(elapsed.TotalMilliseconds);
+                lastTime = current;
             } while (!player1.Exit);
         }
     }

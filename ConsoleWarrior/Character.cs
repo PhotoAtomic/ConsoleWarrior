@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ConsoleWarrior
 {
-    internal abstract class Character : Entity, IVisible
+    public abstract class Character : Entity, IVisible
     {
         protected readonly IDriver driver;
         protected ISprite currentSprite;
@@ -47,7 +47,7 @@ namespace ConsoleWarrior
             driver.Clean(previousRequest);
         }
 
-        public virtual IEnumerable<DrawRequest> Render()
+        public virtual IEnumerable<DrawRequest> Render(double elapsed)
         {
             previousRequest = new DrawRequest(currentSprite, X, Y, Depth);
             yield return previousRequest;

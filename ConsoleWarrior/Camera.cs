@@ -27,12 +27,12 @@ namespace ConsoleWarrior
             inView.Remove(other);
         }
 
-        internal void Render()
+        internal void Render(double elapsed)
         {
 
             var transformedRequests = inView
                 .OfType<IVisible>()
-                .SelectMany(x => x.Render())
+                .SelectMany(x => x.Render(elapsed))
                 .OrderBy(x => x.Z);
                 
 
