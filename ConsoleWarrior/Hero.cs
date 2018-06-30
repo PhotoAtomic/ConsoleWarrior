@@ -1,27 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ConsoleWarrior
 {
-    internal class Hero : Character, IVisible
+    internal class Hero : Character
     {
- 
-        public Hero()
+        private readonly ISprite idle;
+        public Hero(IDriver driver):base(driver)
         {
+            idle = driver.GetSprite("Hero-Idle");
+            currentSprite = idle;
         }
-
-        public int Depth => 0;
-
+        
         public void Fire()
         {
 
         }
 
-        public void Render()
-        {
-            Console.SetCursorPosition(X, Y);
-            Console.Write("X");
-        }
-
-
+        
     }
 }

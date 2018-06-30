@@ -17,13 +17,13 @@ namespace ConsoleWarrior
             return Move(x, y);
         }
 
-        protected Movement Move(int x, int y)
+        protected virtual Movement Move(int x, int y)
         {
-            Movement movement = shape.Move(world, this, x, y);
-            movement
-                .ContinueWith(() => previousMovement?.Rollback())
-                .ContinueWith(()=> { X = x; Y = y; });
-            return movement;
+            previousMovement = shape.Move(world, this, x, y)
+                .ContinueWith(() => previousMovement?.Complete())
+                .ContinueWith(() => { X = x; Y = y; });
+                
+            return previousMovement;
         }
 
         protected internal virtual bool VetoCollision(Movement movement)

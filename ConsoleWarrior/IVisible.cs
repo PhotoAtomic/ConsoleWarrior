@@ -1,9 +1,11 @@
-﻿namespace ConsoleWarrior
+﻿using System.Collections.Generic;
+
+namespace ConsoleWarrior
 {
     internal interface IVisible
     {
         int Depth { get; }
 
-        void Render();
+        IEnumerable<DrawRequest> Render();
     }
 }

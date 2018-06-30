@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleWarrior.Drivers;
+using System;
 
 namespace ConsoleWarrior
 {
@@ -7,10 +8,14 @@ namespace ConsoleWarrior
 
         static void Main(string[] args)
         {
+
+            IDriver driver = new ConsoleGraphic();
+
             World level = LevelLoader.Load();
-            var hero = new Hero();
-            var camera = new Camera();
+            var hero = new Hero(driver);
+            var camera = new Camera(driver);
             IController player1 = new ConsoleController(hero);
+
             camera.Attach(level, level.Width / 2, level.Height / 2).Commit();
             hero.Attach(level, level.Width /2 , level.Height / 2).Commit();
 

@@ -8,11 +8,12 @@ namespace ConsoleWarrior
     public class Camera : Entity
     {
         HashSet<Entity> inView = new HashSet<Entity>();
+        private IDriver driver;
 
-        public Camera()
+        public Camera(IDriver driver)
         {
-            Console.CursorVisible = false;
-            shape = new AreaShape(100, 100);
+            this.driver = driver;            
+            shape = new AreaShape(Console.LargestWindowWidth, Console.LargestWindowHeight);
 
         }
 
@@ -28,9 +29,17 @@ namespace ConsoleWarrior
 
         internal void Render()
         {
-            foreach (var entity in inView.OfType<IVisible>().OrderBy(x=>x.Depth))
+
+            var transformedRequests = inView
+                .OfType<IVisible>()
+                .SelectMany(x => x.Render())
+                .OrderBy(x => x.Z);
+                
+
+            foreach(var request in transformedRequests)
             {
-                entity.Render();
+                request.TranslateTransform(-X, -Y, 0);
+                driver.DrawSprite(request);
             }
         }
     }

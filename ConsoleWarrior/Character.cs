@@ -1,33 +1,56 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ConsoleWarrior
 {
-    internal class Character : Entity
-    {        
-        public virtual void Left()
-        {
-            var prevX = X;
-            var prevY = Y;
+    internal abstract class Character : Entity, IVisible
+    {
+        protected readonly IDriver driver;
+        protected ISprite currentSprite;
+        private DrawRequest previousRequest;
 
-            Move(X - 1, Y)                
+        public int Depth => 0;
+
+        public Character(IDriver driver)
+        {
+            this.driver = driver;
+        }
+
+        protected override Movement Move(int x, int y)
+        {
+            return base.Move(x , y)
+                .CompleteWith(Clean)
                 .Commit();
         }
 
 
-        public virtual void Right()
+
+        public virtual Movement Left()
         {
-            Move(X + 1, Y)
-                .Commit();
+            return Move(X - 1, Y);
+        }              
+        public virtual Movement Right()
+        {
+            return Move(X + 1, Y);
         }
-        public virtual void Up()
+        public virtual Movement Up()
         {
-            Move(X , Y - 1)
-                .Commit();
+            return Move(X, Y - 1);
         }
-        public virtual void Down()
+        public virtual Movement Down()
         {
-            Move(X , Y + 1)
-                .Commit();
+            return Move(X, Y + 1);
+        }
+
+        private void Clean()
+        {
+            driver.Clean(previousRequest);
+        }
+
+        public virtual IEnumerable<DrawRequest> Render()
+        {
+            previousRequest = new DrawRequest(currentSprite, X, Y, Depth);
+            yield return previousRequest;
         }
     }
 }
