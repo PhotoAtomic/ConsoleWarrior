@@ -12,7 +12,7 @@ namespace ConsoleWarrior
         {
             IEnumerable<HashSet<Entity>> involvedCells = MarkCells(world, x, y).Where(cell => cell!=null).ToArray();
 
-            return new Movement(entity, involvedCells);
+            return new Movement(entity,x,y, involvedCells);
             
         }
 

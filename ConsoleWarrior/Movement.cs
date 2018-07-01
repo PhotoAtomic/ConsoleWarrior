@@ -11,7 +11,7 @@ namespace ConsoleWarrior
 
        
 
-        private Entity entity;
+        public readonly Entity Entity ;
         private IEnumerable<HashSet<Entity>> involvedCells;
 
         
@@ -24,7 +24,8 @@ namespace ConsoleWarrior
         private bool executed = false;
         private bool rollbacked = false;
         private bool completed = false;
-        
+        internal readonly int TargetX;
+        internal readonly int TargetY;
 
         public bool? Success { get; private set; } = null;
 
@@ -83,7 +84,7 @@ namespace ConsoleWarrior
 
         public Movement CompleteWith(Action completeAction)
         {
-            if (rollbacked)
+            if (completed)
             {
                 completeAction();
             }
@@ -106,14 +107,14 @@ namespace ConsoleWarrior
 
             Execute(()=>
             {
-                foreach (var cell in involvedCells.Where(x => !x.Contains(entity)))
+                foreach (var cell in involvedCells.Where(x => !x.Contains(Entity)))
                 {
-                    cell.Add(entity);
+                    cell.Add(Entity);
                 }
                 foreach (var other in otherEntities)
                 {
-                    entity.EnterCollision(other);
-                    other.EnterCollision(entity);
+                    Entity.EnterCollision(other);
+                    other.EnterCollision(Entity);
                 }
             });
 
@@ -124,19 +125,19 @@ namespace ConsoleWarrior
         internal void Rollback()
         {
             var otherEntities = involvedCells
-                .Where(x=>x != null && x.Contains(entity))
+                .Where(x=>x != null && x.Contains(Entity))
                 .SelectMany(x => x)
                 .Distinct();
 
             foreach(var otherEntity in otherEntities)
             {
-                entity.ExitCollision(otherEntity);
-                otherEntity.ExitCollision(entity);
+                Entity.ExitCollision(otherEntity);
+                otherEntity.ExitCollision(Entity);
             }
 
             foreach (var involvedCell in involvedCells)
             {
-                involvedCell.Remove(entity);
+                involvedCell.Remove(Entity);
             }
             Undo();
         }
@@ -156,9 +157,11 @@ namespace ConsoleWarrior
             Rollback();
         }
 
-        public Movement(Entity entity, IEnumerable<HashSet<Entity>> involvedCells)
+        public Movement(Entity entity, int targetX, int targetY, IEnumerable<HashSet<Entity>> involvedCells)
         {
-            this.entity = entity;
+            this.TargetX = targetX;
+            this.TargetY = targetY;
+            this.Entity = entity;
             this.involvedCells = involvedCells;            
         }
 

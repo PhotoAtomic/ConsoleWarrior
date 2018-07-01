@@ -17,5 +17,12 @@ namespace ConsoleWarrior.Objects
             currentSprite = fire.GetSprite(elapsed);
             return base.Render(elapsed);
         }
+        protected internal override bool VetoCollision(Movement movement)
+        {
+            return (movement.Entity is Character) && 
+                movement.TargetX == this.X &&
+                movement.TargetY == this.Y;
+            
+        }
     }
 }

@@ -10,16 +10,22 @@ namespace ConsoleWarrior.Sprites.Text
     public class Generic : ICharSprite
     {
 
-        public string Text { get; }
 
-        public Generic(string text)
+
+        public readonly string text;
+        private readonly ConsoleColor foregroundColor;
+        private readonly ConsoleColor backgroundColor;
+
+        public Generic(string text, ConsoleColor foregroundColor = ConsoleColor.Gray, ConsoleColor backgroundColor = ConsoleColor.Black)
         {
-            Text = text;
+            this.text = text;
+            this.foregroundColor = foregroundColor;
+            this.backgroundColor = backgroundColor;
         }        
 
         public void Draw(IDrawer driver, int x, int y)
         {
-            driver.Draw(Text, x, y);
+            driver.Draw(text, x, y, foregroundColor, backgroundColor);
         }
 
     }
