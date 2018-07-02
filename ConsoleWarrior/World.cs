@@ -29,7 +29,7 @@ namespace ConsoleWarrior
 
         public HashSet<Entity> GetCell(int x, int y)
         {
-            if (x < 0 || x >= Width || y < 0 || x >= Height) return null;
+            if (x < 0 || x >= Width || y < 0 || y >= Height) return null;
             return cells[x, y];
         }
       

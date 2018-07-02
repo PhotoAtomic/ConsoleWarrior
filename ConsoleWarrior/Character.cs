@@ -8,6 +8,7 @@ namespace ConsoleWarrior
         protected readonly IDriver driver;
         protected ISprite currentSprite;
         private DrawRequest previousRequest;
+        private HashSet<IFilter> filters = new HashSet<IFilter>();
 
         public int Depth => 0;
 
@@ -49,8 +50,18 @@ namespace ConsoleWarrior
 
         public virtual IEnumerable<DrawRequest> Render(double elapsed)
         {
-            previousRequest = new DrawRequest(currentSprite, X, Y, Depth);
+            previousRequest = new DrawRequest(currentSprite, X, Y, Depth) { Filters = filters};
             yield return previousRequest;
+        }
+
+        public void AddFilter(IFilter filter)
+        {
+            filters.Add(filter);
+        }
+
+        public void RemoveFilter(IFilter filter)
+        {
+            filters.Remove(filter);
         }
     }
 }

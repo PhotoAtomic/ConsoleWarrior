@@ -5,16 +5,18 @@ using System.Linq;
 
 namespace ConsoleWarrior
 {
-    
-    public class Movement :  IDisposable
+
+    public class Movement : IDisposable
     {
 
-       
 
-        public readonly Entity Entity ;
+
+        public readonly Entity Entity;
         private IEnumerable<HashSet<Entity>> involvedCells;
+        private IEnumerable<Entity> alreadyInvolvedEntitites;
 
-        
+        public IEnumerable<Entity> ImpactedEntities { get; private set; }
+
         public IEnumerable<Entity> Vetoed { get; private set; }
 
         private ConcurrentQueue<Action> continuationActions = new ConcurrentQueue<Action>();
@@ -39,7 +41,7 @@ namespace ConsoleWarrior
 
         protected void Execute()
         {
-            while(continuationActions.TryDequeue(out var nextAction)){
+            while (continuationActions.TryDequeue(out var nextAction)) {
                 nextAction();
             }
             executed = true;
@@ -97,21 +99,22 @@ namespace ConsoleWarrior
 
         internal Movement Commit()
         {
-            var otherEntities = involvedCells.Where(x=>x!=null).SelectMany(x => x).Distinct();
-            Vetoed = otherEntities.Where(x=>x.VetoCollision(this));
+            ImpactedEntities = involvedCells.Where(x => x != null).SelectMany(x => x).Distinct();
+            if (alreadyInvolvedEntitites != null) ImpactedEntities = ImpactedEntities.Except(alreadyInvolvedEntitites);
+            Vetoed = ImpactedEntities.Where(x => x.VetoCollision(this));
             if (Vetoed.Any())
             {
                 Success = false;
                 return this;
             }
 
-            Execute(()=>
+            Execute(() =>
             {
                 foreach (var cell in involvedCells.Where(x => !x.Contains(Entity)))
                 {
                     cell.Add(Entity);
                 }
-                foreach (var other in otherEntities)
+                foreach (var other in ImpactedEntities)
                 {
                     Entity.EnterCollision(other);
                     other.EnterCollision(Entity);
@@ -124,12 +127,20 @@ namespace ConsoleWarrior
 
         internal void Rollback()
         {
-            var otherEntities = involvedCells
-                .Where(x=>x != null && x.Contains(Entity))
-                .SelectMany(x => x)
-                .Distinct();
+            ExitCells();
+            Undo();
+        }
 
-            foreach(var otherEntity in otherEntities)
+        private void ExitCells()
+        {
+            var otherEntities = involvedCells
+                            .Where(x => x != null && x.Contains(Entity))
+                            .SelectMany(x => x)
+                            .Distinct();
+
+            if (alreadyInvolvedEntitites != null) otherEntities = alreadyInvolvedEntitites.Except(otherEntities);
+
+            foreach (var otherEntity in otherEntities)
             {
                 Entity.ExitCollision(otherEntity);
                 otherEntity.ExitCollision(Entity);
@@ -139,11 +150,15 @@ namespace ConsoleWarrior
             {
                 involvedCell.Remove(Entity);
             }
-            Undo();
         }
 
-
         internal void Complete()
+        {
+            ExitCells();
+            Finalize();
+        }
+
+        private void Finalize()
         {
             while (completeActions.TryDequeue(out var completeAction))
             {
@@ -157,12 +172,19 @@ namespace ConsoleWarrior
             Rollback();
         }
 
+        public Movement ConsiderAlreadyInvolved(IEnumerable<Entity> alreadyInvolvedEntities)
+        {
+            this.alreadyInvolvedEntitites = alreadyInvolvedEntities;
+            return this;
+        }
+
         public Movement(Entity entity, int targetX, int targetY, IEnumerable<HashSet<Entity>> involvedCells)
         {
             this.TargetX = targetX;
             this.TargetY = targetY;
             this.Entity = entity;
-            this.involvedCells = involvedCells;            
+            this.involvedCells = involvedCells;         
+            
         }
 
              

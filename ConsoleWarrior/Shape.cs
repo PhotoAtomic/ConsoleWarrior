@@ -6,7 +6,7 @@ namespace ConsoleWarrior
 {
     public abstract class Shape
     {
-        public static readonly Shape Dot = new DotShape();
+        //public static readonly Shape Dot = new DotShape();
 
         internal Movement Move(World world, Entity entity, int x, int y)
         {
@@ -17,6 +17,7 @@ namespace ConsoleWarrior
         }
 
         protected abstract IEnumerable<HashSet<Entity>> MarkCells(World world, int x, int y);
+       
     }
 
     public class DotShape : Shape
@@ -31,20 +32,28 @@ namespace ConsoleWarrior
     {
         public int Width { get; set; }
         public int Height { get; set; }
+        public int Top { get; set; }
+        public int Left { get; set; }
 
-        public AreaShape(int width, int height)
+        public AreaShape(int top, int left, int width, int height)
         {
+            Top = top;
+            Left = left;
             Width = width;
             Height = height;
         }
 
+        public AreaShape(int width, int height): this(0,0,width,height)
+        {            
+        }
+
         protected override IEnumerable<HashSet<Entity>> MarkCells(World world, int x, int y)
         {
-            for( ; x<Width; x++)
+            for( var i = 0; i<Width; i++)
             {
-                for (; y < Height; y++)
+                for (var j = 0; j < Height; j++)
                 {
-                    yield return world.GetCell(x, y);
+                    yield return world.GetCell(Left + i + x, Top + j + y);
                 }
             }
             

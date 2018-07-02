@@ -8,6 +8,7 @@ namespace ConsoleWarrior
         
         void DrawSprite(DrawRequest request);
         void Clean(DrawRequest previousRequest);
-        Fire GetAnimation(string name);
+        IAnimation GetAnimation(string name);
+        IFilter GetFilter(string name);
     }
 }

@@ -6,7 +6,7 @@ namespace ConsoleWarrior
     {
         private Movement previousMovement = null;
         private World world;
-        protected Shape shape = Shape.Dot;
+        protected Shape shape = new DotShape();
 
         public int X { get; private set; }
         public int Y { get; private set; }
@@ -20,6 +20,7 @@ namespace ConsoleWarrior
         protected virtual Movement Move(int x, int y)
         {
             previousMovement = shape.Move(world, this, x, y)
+                .ConsiderAlreadyInvolved(previousMovement?.ImpactedEntities)
                 .ContinueWith(() => previousMovement?.Complete())
                 .ContinueWith(() => { X = x; Y = y; });
                 

@@ -2,85 +2,94 @@
 using ConsoleWarrior.Sprites.Text.Flame;
 using System;
 using ConsoleWarrior.Animations;
+using ConsoleWarrior.Filters.Text;
 
 namespace ConsoleWarrior.Drivers
 {
+
+    public class Filter : IDrawer
+    {
+        public Filter(int width, int height)
+        {
+            Width = width;
+            Heigth = height;
+        }
+
+        public int Width { get; }
+        public int Heigth { get; }
+
+        public void Draw(string text, int x, int y, ConsoleColor foreground = ConsoleColor.Gray, ConsoleColor background = ConsoleColor.Black)
+        {
+            if (x < 0 || x >= Width || y < 0 || y >= Heigth) return;
+            Console.BackgroundColor = FilterBackground(background);
+            Console.ForegroundColor = FilterForeground(foreground);
+            Console.SetCursorPosition(x, y);
+            Console.WriteLine(FilterText(text));
+        }
+
+        protected virtual string FilterText(string text)
+        {
+            return text;
+        }
+
+        protected virtual ConsoleColor FilterForeground(ConsoleColor foreground)
+        {
+            return foreground;
+        }
+
+        protected virtual ConsoleColor FilterBackground(ConsoleColor background)
+        {
+            return background;
+        }
+    }
+
+    public class Cleaner : Filter
+    {
+        public Cleaner(int width, int height) : base(width, height) { }
+        protected override string FilterText(string text)
+        {
+            return " ";
+        }
+
+    }
+
+    public class DynamicFilter : Filter
+    {
+        public DynamicFilter(int width, int height) : base(width, height) { }
+
+        public Func<string, string> TextFilterFunction { get; set; }
+        public Func<ConsoleColor, ConsoleColor> ForegroundFilterFunction { get; set; }
+
+        public Func<ConsoleColor, ConsoleColor> BackgroundFilterFunction { get; set; }
+
+        public void Reset()
+        {
+            ForegroundFilterFunction = null;
+            BackgroundFilterFunction = null;
+        }
+
+        protected override string FilterText(string text)
+        {
+            return TextFilterFunction?.Invoke(text) ?? base.FilterText(text);
+        }
+        protected override ConsoleColor FilterBackground(ConsoleColor color)
+        {
+            return BackgroundFilterFunction?.Invoke(color) ?? base.FilterBackground(color);
+        }
+        protected override ConsoleColor FilterForeground(ConsoleColor color)
+        {
+            return ForegroundFilterFunction?.Invoke(color) ?? base.FilterForeground(color);
+        }
+
+    }
+
     public class ConsoleGraphic : IDriver
     {
 
-        private class Filter : IDrawer
-        {
-            public Filter(int width, int height)
-            {
-                Width = width;
-                Heigth = height;
-            }
-
-            public int Width { get; }
-            public int Heigth { get; }
-
-            public void Draw(string text, int x, int y, ConsoleColor foreground = ConsoleColor.Gray, ConsoleColor background = ConsoleColor.Black)
-            {
-                if (x < 0 || x >= Width || y < 0 || y >= Heigth) return;
-                Console.BackgroundColor = FilterBackground(background);
-                Console.ForegroundColor = FilterForeground(foreground);
-                Console.SetCursorPosition(x, y);
-                Console.WriteLine(FilterText(text));
-            }
-
-            protected virtual string FilterText(string text)
-            {
-                return text;
-            }
-
-            protected virtual ConsoleColor FilterForeground(ConsoleColor foreground)
-            {
-                return foreground;
-            }
-
-            protected virtual ConsoleColor FilterBackground(ConsoleColor background)
-            {
-                return background;
-            }
-        }
-
-        private class Cleaner : Filter
-        {
-            public Cleaner(int width, int height) : base(width, height) { }
-            protected override string FilterText(string text)
-            {
-                return " ";
-            }
-
-        }
-
-        private class DynamicFilter : Filter
-        {
-            public DynamicFilter(int width, int height) : base(width, height) { }
-
-            public Func<string, string> TextFilterFunction { get; set; }
-            public Func<ConsoleColor, ConsoleColor> ForegroundFilterFunction { get; set; }
-
-            public Func<ConsoleColor, ConsoleColor> BackgroundilterFunction { get; set; }
+        
 
 
-            protected override string FilterText(string text)
-            {
-                return TextFilterFunction?.Invoke(text) ?? base.FilterText(text);                
-            }
-            protected override ConsoleColor FilterBackground(ConsoleColor color)
-            {
-                return BackgroundilterFunction?.Invoke(color) ?? base.FilterBackground(color);
-            }
-            protected override ConsoleColor FilterForeground(ConsoleColor color)
-            {
-                return ForegroundFilterFunction?.Invoke(color) ?? base.FilterForeground(color);
-            }
 
-        }
-
-
-      
 
         readonly int Width = 100;//Console.LargestWindowWidth;
         readonly int Heigth = 50;//Console.LargestWindowHeight;
@@ -94,7 +103,7 @@ namespace ConsoleWarrior.Drivers
         public ConsoleGraphic()
         {
             Console.SetBufferSize(Width, Heigth);
-            Console.SetWindowSize(Width, Heigth+1);
+            Console.SetWindowSize(Width, Heigth + 1);
             Console.CursorVisible = false;
             CleanerRenderer = new Cleaner(Width, Heigth);
             DynamicRenderer = new DynamicFilter(Width, Heigth);
@@ -114,7 +123,7 @@ namespace ConsoleWarrior.Drivers
 
         public void Draw(string text, int x, int y, ConsoleColor foreground = ConsoleColor.Gray, ConsoleColor background = ConsoleColor.Black)
         {
-            
+
             if (x < 0 || x >= Width || y < 0 || y >= Heigth) return;
             Console.SetCursorPosition(x, y);
             Console.ForegroundColor = foreground;
@@ -128,6 +137,11 @@ namespace ConsoleWarrior.Drivers
             if (request?.sprite is ICharSprite s)
             {
                 request.TranslateTransform(Width / 2, Heigth / 2, 0);
+                DynamicRenderer.Reset();
+                foreach(var filter in request.Filters)
+                {
+                    filter.Apply(DynamicRenderer);
+                }
                 s.Draw(DynamicRenderer, (int)request.X, (int)request.Y);
             }
         }
@@ -140,13 +154,22 @@ namespace ConsoleWarrior.Drivers
             }
         }
 
-        public Fire GetAnimation(string name)
+        public IAnimation GetAnimation(string name)
         {
             switch (name)
             {
-                case "fire":return new Fire(this);
+                case "fire": return new Fire(this);
+            }
+            throw new ArgumentOutOfRangeException();
+        }
+
+        public IFilter GetFilter(string name)
+        {
+            switch (name)
+            {
+                case "enlight": return new Enlight();
             }
             throw new ArgumentOutOfRangeException();
         }
     }
-}
+}    

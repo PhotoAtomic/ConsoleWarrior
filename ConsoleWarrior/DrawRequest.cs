@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ConsoleWarrior
 {
@@ -16,6 +17,8 @@ namespace ConsoleWarrior
             Y = y;
             Z = z;
         }
+
+        public IEnumerable<IFilter> Filters { get; set; }
 
         internal void TranslateTransform(int x, int y, int z)
         {
