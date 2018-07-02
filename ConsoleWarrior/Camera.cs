@@ -13,7 +13,7 @@ namespace ConsoleWarrior
         public Camera(IDriver driver)
         {
             this.driver = driver;            
-            shape = new AreaShape(-50,-50,100,100);
+            shape = new AreaShape(-48, -23, 48, 23);
 
         }
 

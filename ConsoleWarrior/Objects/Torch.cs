@@ -13,7 +13,7 @@ namespace ConsoleWarrior.Objects
         {
             enlight = driver.GetFilter("enlight");
             fire = driver.GetAnimation("fire");
-            shape = new AreaShape(-1, -1, 3, 3);
+            shape = new AreaShape(-1, -1, 1, 1);
         }
         public override IEnumerable<DrawRequest> Render(double elapsed)
         {

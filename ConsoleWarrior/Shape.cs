@@ -30,30 +30,32 @@ namespace ConsoleWarrior
 
     public class AreaShape : Shape
     {
-        public int Width { get; set; }
-        public int Height { get; set; }
+        
         public int Top { get; set; }
         public int Left { get; set; }
+        public int Right { get; set;  }
+        public int Bottom { get; set;  }
 
-        public AreaShape(int top, int left, int width, int height)
+        public AreaShape(int left, int top, int right, int bottom)
         {
             Top = top;
             Left = left;
-            Width = width;
-            Height = height;
+            Right = right;
+            Bottom = bottom;
+            
         }
 
-        public AreaShape(int width, int height): this(0,0,width,height)
+        public AreaShape(int width, int height): this(0, 0, width, height)
         {            
         }
 
         protected override IEnumerable<HashSet<Entity>> MarkCells(World world, int x, int y)
         {
-            for( var i = 0; i<Width; i++)
+            for( var i = Left; i<=Right; i++)
             {
-                for (var j = 0; j < Height; j++)
+                for (var j = Top; j <= Bottom; j++)
                 {
-                    yield return world.GetCell(Left + i + x, Top + j + y);
+                    yield return world.GetCell(i + x, j + y);
                 }
             }
             
