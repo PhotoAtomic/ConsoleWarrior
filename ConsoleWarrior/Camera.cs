@@ -13,7 +13,7 @@ namespace ConsoleWarrior
         public Camera(IDriver driver)
         {
             this.driver = driver;            
-            shape = new AreaShape(Console.LargestWindowWidth, Console.LargestWindowHeight);
+            shape = new AreaShape(-50,-50,100,100);
 
         }
 

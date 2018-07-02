@@ -102,8 +102,9 @@ namespace ConsoleWarrior.Drivers
 
         public ConsoleGraphic()
         {
+            Console.SetWindowSize(Width, Heigth);
             Console.SetBufferSize(Width, Heigth);
-            Console.SetWindowSize(Width, Heigth + 1);
+            
             Console.CursorVisible = false;
             CleanerRenderer = new Cleaner(Width, Heigth);
             DynamicRenderer = new DynamicFilter(Width, Heigth);

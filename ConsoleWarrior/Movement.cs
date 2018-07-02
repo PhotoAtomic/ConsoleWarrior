@@ -33,9 +33,9 @@ namespace ConsoleWarrior
 
         protected Movement Execute(Action nextAction)
         {
-            var continuator = ContinueWith(nextAction);
+            ContinueWith(nextAction);
             Execute();
-            return continuator;
+            return this;
         }
 
 
@@ -99,8 +99,12 @@ namespace ConsoleWarrior
 
         internal Movement Commit()
         {
-            ImpactedEntities = involvedCells.Where(x => x != null).SelectMany(x => x).Distinct();
-            if (alreadyInvolvedEntitites != null) ImpactedEntities = ImpactedEntities.Except(alreadyInvolvedEntitites);
+            ImpactedEntities = involvedCells
+                .Where(x => x != null)
+                .SelectMany(x => x)
+                .Distinct();                
+            
+            
             Vetoed = ImpactedEntities.Where(x => x.VetoCollision(this));
             if (Vetoed.Any())
             {
@@ -114,7 +118,7 @@ namespace ConsoleWarrior
                 {
                     cell.Add(Entity);
                 }
-                foreach (var other in ImpactedEntities)
+                foreach (var other in ImpactedEntities.Except(alreadyInvolvedEntitites ?? Enumerable.Empty<Entity>()))
                 {
                     Entity.EnterCollision(other);
                     other.EnterCollision(Entity);
@@ -134,13 +138,14 @@ namespace ConsoleWarrior
         private void ExitCells()
         {
             var otherEntities = involvedCells
-                            .Where(x => x != null && x.Contains(Entity))
+                            .Where(x => x != null)
                             .SelectMany(x => x)
+                            .Where(x=>x!=Entity)
                             .Distinct();
 
-            if (alreadyInvolvedEntitites != null) otherEntities = alreadyInvolvedEntitites.Except(otherEntities);
+            
 
-            foreach (var otherEntity in otherEntities)
+            foreach (var otherEntity in (alreadyInvolvedEntitites ?? Enumerable.Empty<Entity>()).Except(otherEntities))
             {
                 Entity.ExitCollision(otherEntity);
                 otherEntity.ExitCollision(Entity);
@@ -155,10 +160,10 @@ namespace ConsoleWarrior
         internal void Complete()
         {
             ExitCells();
-            Finalize();
+            Terminate();
         }
 
-        private void Finalize()
+        private void Terminate()
         {
             while (completeActions.TryDequeue(out var completeAction))
             {
